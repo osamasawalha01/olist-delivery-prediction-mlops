@@ -1,0 +1,7 @@
+-r runtime.txt
+
+pytest==8.4.2
+httpx==0.28.1
+ruff==0.13.3
+jupyter==1.1.1
+ipykernel==7.0.1

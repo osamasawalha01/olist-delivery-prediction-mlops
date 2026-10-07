@@ -1,0 +1,55 @@
+[project]
+name = "olist-mlops"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Osama Sawalha", email = "osamasawalha15@gmail.com" }
+]
+requires-python = ">=3.13.7"
+dependencies = [
+    "dvc>=3.67.1",
+    "fastapi>=0.142.2",
+    "great-expectations>=1.23.2",
+    "ipykernel>=7.4.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "mlflow>=3.16.1",
+    "pandas>=3.0.6",
+    "psycopg2-binary>=2.9.13",
+    "pyarrow>=25.0.1",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.1",
+    "seaborn>=0.13.2",
+    "sqlalchemy>=2.1.1",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+olist-mlops = "olist_mlops:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+]
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # Pyflakes
+    "I",   # import sorting
+    "B",   # flake8-bugbear
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -1,0 +1,35 @@
+project:
+  name: olist-mlops
+  version: "1.0.0"
+
+paths:
+  artifacts_dir: "artifacts"
+  model_path: "artifacts/06_logistic_regression.joblib"
+  preprocessor_path: "artifacts/05_preprocessor.joblib"
+  feature_list_path: "artifacts/05_feature_list.csv"
+  logs_dir: "logs"
+
+model:
+  name: "logistic_regression"
+  version: "1.0.0"
+
+inference:
+  probability_threshold: 0.5
+
+logging:
+  level: "INFO"
+  file: "logs/inference.log"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+
+mlflow:
+  tracking_uri: "http://127.0.0.1:5000"
+  registered_model_name: "olist-logistic-regression"
+  model_version: "1"
+  
+monitoring:
+  baseline_late_prediction_rate: 0.3419707020453289
+  drift_threshold: 0.15
+  minimum_samples: 50

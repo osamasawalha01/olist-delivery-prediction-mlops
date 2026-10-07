@@ -1,0 +1,42 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# Test / tool caches
+.pytest_cache/
+.ruff_cache/
+
+# Project artifacts managed by DVC
+/artifacts/
+/.dvc-storage/
+
+# MLflow local runtime data
+/mlruns/
+/mlartifacts/
+/mlflow.db
+
+# Application logs
+/logs/
+*.log
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Raw Olist datasets
+/olist_*.csv
+/product_category_name_translation.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
