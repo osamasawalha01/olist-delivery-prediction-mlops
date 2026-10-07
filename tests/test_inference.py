@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
@@ -12,7 +15,6 @@ def pipeline():
 
 @pytest.fixture(autouse=True)
 def mock_prediction_persistence(monkeypatch):
-    """Prevent inference tests from writing prediction logs to PostgreSQL."""
     monkeypatch.setattr(
         inference_module,
         "save_prediction",
@@ -22,8 +24,12 @@ def mock_prediction_persistence(monkeypatch):
 
 @pytest.fixture
 def sample_input():
-    df = pd.read_parquet("artifacts/03_test.parquet")
-    return df.iloc[[0]]
+    fixture_path = Path("tests/fixtures/known_order.json")
+
+    with fixture_path.open("r", encoding="utf-8") as file:
+        order = json.load(file)
+
+    return pd.DataFrame([order])
 
 
 def test_model_loaded(pipeline):
@@ -47,12 +53,10 @@ def test_known_prediction(pipeline, sample_input):
 
     assert result["prediction"] == 0
     assert result["label"] == "on_time"
-
     assert result["probability"] == pytest.approx(
         0.4695051465317476,
         abs=1e-12,
     )
-
     assert result["model_name"] == "logistic_regression"
     assert result["model_version"] == "1"
 
