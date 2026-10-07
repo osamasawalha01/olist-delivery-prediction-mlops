@@ -5,13 +5,11 @@ import pandas as pd
 
 from olist_mlops.config import PROJECT_ROOT, config
 
-MLFLOW_TRACKING_URI = "http://127.0.0.1:5000"
 EXPERIMENT_NAME = "olist-late-delivery"
-REGISTERED_MODEL_NAME = "olist-logistic-regression"
 
 
 def register_model() -> None:
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_tracking_uri(config["mlflow"]["tracking_uri"])
     mlflow.set_experiment(EXPERIMENT_NAME)
 
     model_path = PROJECT_ROOT / config["paths"]["model_path"]
@@ -60,10 +58,10 @@ def register_model() -> None:
         mlflow.sklearn.log_model(
             sk_model=model,
             name="model",
-            registered_model_name=REGISTERED_MODEL_NAME,
+            registered_model_name=config["mlflow"]["registered_model_name"],
         )
 
-        print(f"Registered model: {REGISTERED_MODEL_NAME}")
+        print(f"Registered model: {config['mlflow']['registered_model_name']}")
 
 
 if __name__ == "__main__":
