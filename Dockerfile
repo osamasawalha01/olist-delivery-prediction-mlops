@@ -11,7 +11,9 @@ RUN pip install --no-cache-dir uv \
 COPY app ./app
 COPY config ./config
 
-COPY models/production ./models/production
+COPY scripts/bootstrap_model.py ./scripts/bootstrap_model.py
+
+RUN python scripts/bootstrap_model.py
 
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app:/app/src"
