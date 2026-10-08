@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir uv \
 COPY app ./app
 COPY config ./config
 
+COPY models/production ./models/production
+
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH="/app:/app/src"
 
