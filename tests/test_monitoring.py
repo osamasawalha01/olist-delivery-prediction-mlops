@@ -106,3 +106,26 @@ def test_drift_emits_warning(monitoring_db, caplog):
 
     assert result["drift_detected"] is True
     assert "Prediction drift detected" in caplog.text
+
+
+def test_drift_uses_only_recent_predictions(monitoring_db):
+    # Older predictions: 100% late.
+    add_predictions(
+        monitoring_db,
+        late_count=100,
+        on_time_count=0,
+    )
+
+    # Most recent 100 predictions: 34% late.
+    add_predictions(
+        monitoring_db,
+        late_count=34,
+        on_time_count=66,
+    )
+
+    result = monitoring.check_prediction_drift()
+
+    assert result["status"] == "ok"
+    assert result["total_predictions"] == 100
+    assert result["late_predictions"] == 34
+    assert result["production_late_prediction_rate"] == pytest.approx(0.34)

@@ -80,7 +80,18 @@ services:
         condition: service_healthy
       model-init:
         condition: service_completed_successfully
-
+  monitoring-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-m", "olist_mlops.monitoring_worker"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MONITORING_INTERVAL_SECONDS: "300"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 volumes:
   postgres_data:
   mlflow_data:

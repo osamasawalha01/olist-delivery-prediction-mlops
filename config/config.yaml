@@ -35,3 +35,4 @@ monitoring:
   baseline_late_prediction_rate: 0.3419707020453289
   drift_threshold: 0.15
   minimum_samples: 50
+  window_size: 100

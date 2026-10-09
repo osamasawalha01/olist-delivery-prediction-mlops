@@ -8,7 +8,6 @@ from sqlalchemy import (
     Integer,
     String,
     create_engine,
-    func,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -104,27 +103,31 @@ def save_prediction(
 
 
 def check_prediction_drift() -> dict:
-    """Check production prediction distribution against the reference baseline."""
+    """Check drift using the most recent production predictions."""
     engine = get_engine()
-
     SessionLocal = sessionmaker(
         bind=engine,
         expire_on_commit=False,
     )
 
-    with SessionLocal() as session:
-        total_predictions = session.query(func.count(PredictionLog.id)).scalar() or 0
-
-        late_predictions = (
-            session.query(func.count(PredictionLog.id))
-            .filter(PredictionLog.prediction == 1)
-            .scalar()
-            or 0
-        )
-
     minimum_samples = config["monitoring"]["minimum_samples"]
+    window_size = config["monitoring"]["window_size"]
     baseline_rate = config["monitoring"]["baseline_late_prediction_rate"]
     drift_threshold = config["monitoring"]["drift_threshold"]
+
+    if window_size < minimum_samples:
+        raise ValueError("window_size must be >= minimum_samples.")
+
+    with SessionLocal() as session:
+        recent_predictions = (
+            session.query(PredictionLog.prediction)
+            .order_by(PredictionLog.id.desc())
+            .limit(window_size)
+            .all()
+        )
+
+    total_predictions = len(recent_predictions)
+    late_predictions = sum(prediction == 1 for (prediction,) in recent_predictions)
 
     if total_predictions < minimum_samples:
         return {
