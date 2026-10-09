@@ -1,4 +1,6 @@
+import os
 import time
+from pathlib import Path
 
 import joblib
 import mlflow
@@ -20,38 +22,50 @@ class InferencePipeline:
     """Production inference pipeline using saved fitted artifacts."""
 
     def __init__(self):
-        mlflow.set_tracking_uri(config["mlflow"]["tracking_uri"])
-
-        registered_model_name = config["mlflow"]["registered_model_name"]
-        model_version = config["mlflow"]["model_version"]
-
-        model_uri = f"models:/{registered_model_name}/{model_version}"
-
-        # Load registered model from MLflow.
-        self.model = mlflow.sklearn.load_model(model_uri)
-
-        # Get the run associated with this registered model version.
-        client = mlflow.MlflowClient()
-        model_version_info = client.get_model_version(
-            name=registered_model_name,
-            version=model_version,
-        )
-
-        # Download fitted preprocessor from the same MLflow run.
-        preprocessor_path = mlflow.artifacts.download_artifacts(
-            run_id=model_version_info.run_id,
-            artifact_path="preprocessing/05_preprocessor.joblib",
-        )
-
-        self.preprocessor = joblib.load(preprocessor_path)
-
         self.model_name = config["model"]["name"]
-        self.model_version = model_version
-
+        self.model_version = str(config["mlflow"]["model_version"])
         self.threshold = config["inference"]["probability_threshold"]
 
+        model_source = os.getenv("OLIST_MODEL_SOURCE", "mlflow").lower()
+
+        if model_source == "local":
+            model_dir = Path("models/production")
+
+            self.model = joblib.load(model_dir / "06_logistic_regression.joblib")
+            self.preprocessor = joblib.load(model_dir / "05_preprocessor.joblib")
+
+        elif model_source == "mlflow":
+            mlflow.set_tracking_uri(config["mlflow"]["tracking_uri"])
+
+            registered_model_name = config["mlflow"]["registered_model_name"]
+
+            model_uri = f"models:/{registered_model_name}/{self.model_version}"
+
+            # Load registered model from MLflow.
+            self.model = mlflow.sklearn.load_model(model_uri)
+
+            # Get the run associated with this model version.
+            client = mlflow.MlflowClient()
+
+            model_version_info = client.get_model_version(
+                name=registered_model_name,
+                version=self.model_version,
+            )
+
+            # Download the fitted preprocessor from the same run.
+            preprocessor_path = mlflow.artifacts.download_artifacts(
+                run_id=model_version_info.run_id,
+                artifact_path="preprocessing/05_preprocessor.joblib",
+            )
+
+            self.preprocessor = joblib.load(preprocessor_path)
+
+        else:
+            raise ValueError(f"Unsupported OLIST_MODEL_SOURCE: {model_source}")
+
         logger.info(
-            "Model loaded | name=%s | version=%s",
+            "Model loaded | source=%s | name=%s | version=%s",
+            model_source,
             self.model_name,
             self.model_version,
         )
@@ -96,6 +110,7 @@ class InferencePipeline:
             }
 
             latency_ms = (time.perf_counter() - start_time) * 1000
+
             save_prediction(
                 prediction=prediction,
                 label=result["label"],
@@ -104,6 +119,7 @@ class InferencePipeline:
                 model_name=self.model_name,
                 model_version=self.model_version,
             )
+
             logger.info(
                 "Prediction completed | rows=%d | "
                 "prediction=%d | probability=%.6f | "

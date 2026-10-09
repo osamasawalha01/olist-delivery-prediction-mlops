@@ -41,6 +41,8 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Run tests
+        env:
+          OLIST_MODEL_SOURCE: local
         run: uv run python -m pytest -q
 
   docker:
