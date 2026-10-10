@@ -1,0 +1,17 @@
+.venv
+.git
+.dvc
+.dvc-storage
+.pytest_cache
+__pycache__
+*.pyc
+
+notebooks
+tests
+logs
+mlruns
+mlartifacts
+
+*.csv
+*.parquet
+.ipynb_checkpoints
