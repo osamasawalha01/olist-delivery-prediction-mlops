@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
@@ -19,6 +20,15 @@ from olist_mlops.metrics import (
     REQUEST_COUNT,
     REQUEST_LATENCY,
 )
+from olist_mlops.monitoring import initialize_monitoring_db
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize monitoring tables before accepting API requests."""
+    initialize_monitoring_db()
+    yield
+
 
 app = FastAPI(
     title="Olist Late Delivery Prediction API",
