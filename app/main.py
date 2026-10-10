@@ -34,6 +34,7 @@ app = FastAPI(
     title="Olist Late Delivery Prediction API",
     version=config["project"]["version"],
     description="Production inference API for predicting late Olist deliveries.",
+    lifespan=lifespan,
 )
 
 pipeline = InferencePipeline()
